@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donor Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-shell donor-dashboard-shell">
+    <header class="donor-hero">
+      <div class="donor-hero-copy">
+        <span class="donor-eyebrow">Your giving, making a difference</span>
+        <h1>Welcome, {{ user.name }}</h1>
+        <p>Every contribution helps move a community cause forward.</p>
+      </div>
+      <nav class="action-row" aria-label="Donor navigation">
+        <a class="btn donor-primary-action" href="/causes">Explore causes</a>
+        <a class="btn donor-secondary-action" href="/history">Donation history</a>
+        <a class="btn donor-logout-action" href="/logout">Logout</a>
+      </nav>
+    </header>
+
+    <div class="summary-row">
+      <div class="mini-card donor-stat donor-stat-highlight">
+        <h4>Total Donated</h4>
+        <strong>₹{{ '%.2f'|format(donations|sum(attribute='amount')) if donations else '0.00' }}</strong>
+        <span>Your contribution so far</span>
+      </div>
+      <div class="mini-card donor-stat">
+        <h4>Donations</h4>
+        <strong>{{ donations|length if donations else 0 }}</strong>
+        <span>Gifts you've made</span>
+      </div>
+      <div class="mini-card donor-stat">
+        <h4>Causes Supported</h4>
+        <strong>{{ donations|map(attribute='cause')|unique|list|length if donations else 0 }}</strong>
+        <span>Different causes reached</span>
+      </div>
+    </div>
+
+    <section class="donor-causes-section" aria-labelledby="donor-causes-title">
+      <div class="donor-section-heading">
+        <div>
+          <span class="donor-eyebrow donor-eyebrow-dark">Choose where to help next</span>
+          <h2 id="donor-causes-title">Causes making progress</h2>
+        </div>
+        <a class="donor-text-link" href="/causes">See all causes <span aria-hidden="true">→</span></a>
+      </div>
+      {% if causes %}
+      <div class="donor-cause-grid">
+        {% for cause in causes %}
+        {% set percent = (cause.raised / cause.goal * 100) if cause.goal else 0 %}
+        <article class="donor-cause-card">
+          <div class="donor-cause-topline">
+            <span class="donor-cause-mark">Community</span>
+            <span class="donor-cause-percent">{{ '%.0f'|format(percent) }}% funded</span>
+          </div>
+          <h3>{{ cause.title }}</h3>
+          <p>{{ cause.description }}</p>
+          <progress class="donor-progress-track" aria-label="{{ cause.title }} funding progress" max="100" value="{{ percent if percent <= 100 else 100 }}"></progress>
+          <div class="donor-cause-total">
+            <strong>₹{{ '%.0f'|format(cause.raised) }}</strong>
+            <span>of ₹{{ '%.0f'|format(cause.goal) }}</span>
+          </div>
+          <a class="btn donor-cause-action" href="/donate?cause_id={{ cause.id }}">Support this cause <span aria-hidden="true">→</span></a>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><h3>No active causes right now</h3><p>Please check back soon to find a cause to support.</p></div>
+      {% endif %}
+    </section>
+
+    <div class="panel">
+      <h2>Your Donations</h2>
+      {% if donations %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cause</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for donation in donations %}
+            <tr>
+              <td>{{ donation.cause }}</td>
+              <td>₹{{ '%.2f'|format(donation.amount) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>You have not made any donations yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <h2>Recent Donations</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Donor</th>
+              <th>Cause</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_donations %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.cause }}</td>
+              <td>₹{{ '%.2f'|format(item.amount) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

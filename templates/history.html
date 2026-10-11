@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-shell">
+    <div class="topbar">
+      <div>
+        <h1>{{ title }}</h1>
+        <p>Logged in as {{ user.name }} ({{ user.email }})</p>
+      </div>
+      <div class="action-row">
+        <a class="btn" href="/dashboard">Dashboard</a>
+        <a class="btn" href="/causes">Causes</a>
+        <a class="btn" href="/logout">Logout</a>
+      </div>
+    </div>
+
+    <div class="summary-row">
+      <div class="mini-card">
+        <h4>Total Donations</h4>
+        <strong>{{ donations|length }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Total Amount</h4>
+        <strong>₹{{ '%.2f'|format(total_amount) }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Donors</h4>
+        <strong>{{ summary.total_donors }}</strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Donation History</h2>
+      {% if donations %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% if user.role == 'admin' %}<th>Donor</th>{% endif %}
+              <th>Cause</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in donations %}
+            <tr>
+              {% if user.role == 'admin' %}<td>{{ item.donor }}</td>{% endif %}
+              <td>{{ item.cause }}</td>
+              <td>₹{{ '%.2f'|format(item.amount) }}</td>
+              <td>{{ item.date.strftime('%Y-%m-%d %H:%M') if item.date else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No donations recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+</head>
+<body>
+  <div class="page-shell dashboard-shell">
+    <header class="dashboard-hero">
+      <div class="dashboard-intro">
+        <span class="eyebrow">Admin control center</span>
+        <h1>Admin Dashboard</h1>
+        <p>Logged in as {{ user.name }} ({{ user.email }})</p>
+      </div>
+
+      <div class="quick-actions">
+        <a class="btn btn-secondary-soft" href="/history">Donation History</a>
+        <a class="btn btn-ghost" href="/logout">Logout</a>
+      </div>
+    </header>
+
+    <div class="summary-row">
+      <div class="mini-card mini-card-accent">
+        <h4>Total Raised</h4>
+        <strong>₹{{ '%.2f'|format(summary.total_raised) }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Total Donors</h4>
+        <strong>{{ summary.total_donors }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Active Causes</h4>
+        <strong>{{ summary.total_causes }}</strong>
+      </div>
+    </div>
+
+    <section class="panel admin-cause-panel" aria-labelledby="cause-management-title">
+      <div class="admin-cause-heading">
+        <div>
+          <span class="eyebrow admin-cause-eyebrow">Cause management</span>
+          <h2 id="cause-management-title">Add a new cause</h2>
+          <p>New causes are saved to the cloud and shown to donors.</p>
+        </div>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="cause-flash cause-flash-{{ category }}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <div class="admin-cause-layout">
+        <form class="admin-cause-form" action="{{ url_for('create_cause') }}" method="post">
+          <div class="form-group">
+            <label for="cause-name">Cause name</label>
+            <input id="cause-name" name="name" type="text" maxlength="120" required>
+          </div>
+          <div class="form-group">
+            <label for="cause-description">Description</label>
+            <textarea id="cause-description" name="description" rows="3" maxlength="500" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="cause-goal">Fundraising goal (₹)</label>
+            <input id="cause-goal" name="goal_amount" type="number" min="0.01" step="0.01" required>
+          </div>
+          <button class="admin-cause-submit" type="submit">Add cause to cloud</button>
+        </form>
+        <div class="admin-cause-list">
+          <h3>Active causes <span>{{ causes|length }}</span></h3>
+          {% if causes %}
+          <ul>
+            {% for cause in causes %}
+            <li>
+              <span>{{ cause.title }}</span>
+              <strong>₹{{ '%.0f'|format(cause.goal) }} goal</strong>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>No active causes yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-grid">
+      <div class="panel panel-wide">
+        <h2>Donation Summary</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th>Cause</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if donations %}
+                {% for donation in donations %}
+                <tr>
+                  <td>{{ donation.name }}</td>
+                  <td>{{ donation.cause }}</td>
+                  <td>₹{{ '%.2f'|format(donation.amount) }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="3">No donations recorded yet.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="panel side-panel">
+        <h2>Impact Snapshot</h2>
+        <ul class="impact-pills">
+          <li><span>Donations this month</span><strong>₹{{ '%.2f'|format(summary.total_raised) }}</strong></li>
+          <li><span>Registered supporters</span><strong>{{ summary.total_donors }}</strong></li>
+          <li><span>Cause coverage</span><strong>{{ summary.total_causes }} active</strong></li>
+          <li><span>Admin access</span><strong>Monitoring only</strong></li>
+        </ul>
+      </aside>
+    </div>
+
+    <div class="panel">
+      <h2>Recent Donations</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Donor</th>
+              <th>Cause</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_donations %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.cause }}</td>
+              <td>₹{{ '%.2f'|format(item.amount) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Registered Users</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for details in users %}
+            <tr>
+              <td>{{ details.name }}</td>
+              <td>{{ details.email }}</td>
+              <td>{{ details.role }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

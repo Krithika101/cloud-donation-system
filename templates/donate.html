@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donate</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="donation-page">
+  <div class="donation-card">
+    <div class="donation-nav">
+      <a href="/dashboard">Back to dashboard</a>
+    </div>
+
+    <h1>Make a Donation</h1>
+    <p class="welcome-text">Welcome, {{ user.name }}</p>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form action="/donate" method="POST" class="donation-form">
+      <label for="cause_id">Cause</label>
+      <select name="cause_id" id="cause_id" required>
+        {% for cause in causes %}
+          <option value="{{ cause.id }}" {% if selected_cause_id == cause.id %}selected{% endif %}>{{ cause.title }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="amount">Amount (₹)</label>
+      <input type="number" name="amount" id="amount" min="1" step="0.01" placeholder="" required>
+
+      <button type="submit">Donate Now</button>
+    </form>
+  </div>
+</body>
+</html>

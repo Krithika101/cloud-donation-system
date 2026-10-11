@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud Donation System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="landing-page">
+  <header class="landing-header">
+    <nav class="landing-nav">
+      <div class="brand">
+        <span class="brand-mark">❤</span>
+        Cloud Donation
+      </div>
+      <div class="nav-links">
+        <a href="/login">Login</a>
+        <a class="btn-primary" href="/register">Join today</a>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Give with impact</span>
+        <h1>Support causes that bring real change.</h1>
+        <p>
+          Empower communities through transparent giving. Help fund food relief,
+          medical support, education, and local initiatives that make every donation count.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="/register">Start donating</a>
+          <a class="btn-secondary" href="/causes">Explore causes</a>
+        </div>
+      </div>
+
+      <div class="hero-panel">
+        <h3>Community impact</h3>
+        <div class="impact-stat">
+          <span>Total raised</span>
+          <strong>₹{{ '%.2f'|format(summary.total_raised) if summary else '0.00' }}</strong>
+        </div>
+        <ul class="impact-list">
+          <li><span>Active causes</span><strong>{{ summary.total_causes if summary else 0 }}</strong></li>
+          <li><span>Supporters</span><strong>{{ summary.total_donors if summary else 0 }}</strong></li>
+          <li><span>Average gift</span><strong>₹{{ '%.2f'|format((summary.total_raised / summary.total_donors) if summary and summary.total_donors else 0) }}</strong></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="landing-main">
+    <div class="section-head">
+      <h2>Featured causes</h2>
+      <p>Choose a cause and make a meaningful contribution.</p>
+    </div>
+
+    {% if causes %}
+      <div class="cause-grid">
+        {% for cause in causes %}
+          {% set progress = (cause.raised / cause.goal * 100) if cause.goal else 0 %}
+          <article class="cause-card">
+            <span class="tag">Active</span>
+            <h3>{{ cause.title }}</h3>
+            <p>{{ cause.description }}</p>
+            <div class="goal-line">
+              <span>Goal</span>
+              <strong>₹{{ '%.2f'|format(cause.goal) }}</strong>
+            </div>
+            <div class="progress">
+              <span style="width: {{ progress if progress <= 100 else 100 }}%"></span>
+            </div>
+            <div class="meta-row">
+              <span>Raised: ₹{{ '%.2f'|format(cause.raised) }}</span>
+              <strong>{{ '%.0f'|format(progress) }}%</strong>
+            </div>
+            <a class="btn-secondary" href="/register">Donate now</a>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>No causes available right now.</h3>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

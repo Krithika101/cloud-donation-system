@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donation Causes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f2f6fc; color: #222; }
+    .page { width: min(100%, 1100px); max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .summary-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 30px; }
+    .mini-card { background: white; border-radius: 12px; padding: 18px 20px; min-width: 160px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .mini-card h4 { margin: 0 0 8px; color: #667085; font-size: 0.8rem; text-transform: uppercase; }
+    .mini-card strong { font-size: 1.4rem; color: #1f4e79; }
+    .cause-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .cause-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .amount { color: #176b45; font-weight: bold; }
+    progress.progress { appearance: none; display: block; width: 100%; height: 10px; border: 0; border-radius: 999px; overflow: hidden; background: #e5e7eb; margin: 12px 0; }
+    progress.progress::-webkit-progress-bar { background: #e5e7eb; border-radius: 999px; }
+    progress.progress::-webkit-progress-value { background: linear-gradient(90deg, #1f4e79, #2a9d8f); border-radius: 999px; }
+    progress.progress::-moz-progress-bar { background: linear-gradient(90deg, #1f4e79, #2a9d8f); border-radius: 999px; }
+    .btn { display: inline-block; text-decoration: none; background: #1f4e79; color: white; padding: 10px 18px; border-radius: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <h1>Available Causes</h1>
+      <div class="topbar-actions">
+        <a class="btn" href="/dashboard">My Dashboard</a>
+      </div>
+    </div>
+
+    <form method="GET" action="/causes" class="search-box">
+      <input type="search" name="search" value="{{ search_query }}" placeholder="Search food, health, education..." aria-label="Search causes">
+      <button type="submit">Search</button>
+      {% if search_query %}
+      <a class="link-btn" href="/causes">Clear</a>
+      {% endif %}
+    </form>
+
+    <div class="summary-row">
+      <div class="mini-card">
+        <h4>Total Raised</h4>
+        <strong>₹{{ '%.2f'|format(summary.total_raised) }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Active Causes</h4>
+        <strong>{{ summary.total_causes }}</strong>
+      </div>
+      <div class="mini-card">
+        <h4>Donors</h4>
+        <strong>{{ summary.total_donors }}</strong>
+      </div>
+    </div>
+
+    {% if causes %}
+    <div class="cause-grid">
+      {% for cause in causes %}
+      {% set percent = (cause.raised / cause.goal * 100) if cause.goal else 0 %}
+      <div class="cause-card">
+        <h3>{{ cause.title }}</h3>
+        <p>{{ cause.description }}</p>
+        <p class="amount">₹{{ '%.2f'|format(cause.raised) }} raised of ₹{{ '%.2f'|format(cause.goal) }}</p>
+        <progress class="progress" aria-label="{{ cause.title }} funding progress" max="100" value="{{ percent if percent <= 100 else 100 }}"></progress>
+        <a class="btn" href="/donate?cause_id={{ cause.id }}">Donate</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>No causes match your search.</h3>
+      <p>Try a different keyword like "food", "medical", or "education".</p>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>
